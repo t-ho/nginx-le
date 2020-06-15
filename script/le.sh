@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # scripts is trying to renew certificate only if close (30 days) to expiration
 # returns 0 only if certbot called.
@@ -8,7 +8,7 @@ target_cert=/etc/nginx/ssl/le-crt.pem
 renew_before=2592000
 
 if [ "$LETSENCRYPT" != "true" ]; then
-    echo "letsencrypt disabled"
+    echo "[-] Letsencrypt disabled. To enable, set env LETSENCRYPT=true"
     return 1
 fi
 
@@ -20,20 +20,20 @@ if [ -f ${target_cert} ] && openssl x509 -checkend ${renew_before} -noout -in ${
     set -- $(echo ${LE_FQDN} | tr ',' '\n'); for element in "$@"; do echo ${CERT_FQDNS} | grep -q $element ; done
     CHECK_RESULT=$?
     if [ ${CHECK_RESULT} -eq 0 ] ; then
-        echo "letsencrypt certificate ${target_cert} still valid"
+        echo "[*] Letsencrypt certificate ${target_cert} still valid"
         return 1
     else
-        echo "letsencrypt certificate ${target_cert} is present, but doesn't contain expected domains"
-        echo "expected: ${LE_FQDN}"
-        echo "found:    ${CERT_FQDNS}"
+        echo "[*] Letsencrypt certificate ${target_cert} is present, but doesn't contain expected domains"
+        echo "[*] Expected: ${LE_FQDN}"
+        echo "[*] Found:    ${CERT_FQDNS}"
     fi
 fi
 
-echo "letsencrypt certificate will expire soon or missing, renewing..."
-certbot certonly -t -n --agree-tos --renew-by-default --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html -d ${LE_FQDN}
+echo "[*] Letsencrypt certificate will expire soon or missing, renewing..."
+certbot certonly --agree-tos --non-interactive --force-renewal --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html -d ${LE_FQDN}
 le_result=$?
 if [ ${le_result} -ne 0 ]; then
-    echo "failed to run certbot"
+    echo "[-] Failed to run certbot"
     return 1
 fi
 
