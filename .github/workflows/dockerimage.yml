@@ -1,6 +1,9 @@
 name: Docker Image CI
 
-on: [push, pull_request]
+on:
+  release:
+    types:
+      - created
 
 jobs:
 
@@ -9,6 +12,18 @@ jobs:
     runs-on: ubuntu-latest
  
     steps:
-    - uses: actions/checkout@master
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag nginx-le:$(date +%s)
+    - uses: actions/checkout@v2
+    - name: Get release version
+      run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+
+    - uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: 0x8861/nginx-le
+        tag_with_sha: true
+        path: .
+        dockerfile: Dockerfile
+        tags: latest,stable,${{ env.RELEASE_VERSION }}
+        always_pull: true
+        push: true
