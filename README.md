@@ -24,15 +24,16 @@ Simple nginx image (alpine based) with integrated [Let's Encrypt](https://letsen
 
 ## Some implementation details
 
-**Important:** provided [nginx.conf](https://github.com/umputun/nginx-le/blob/master/conf/nginx.conf) handles 
+**Important:** provided [nginx.conf](https://github.com/t-ho/nginx-le/blob/master/etc-nginx/nginx.conf) handles 
 http->https redirect automatically, no need to add it into your custom `service.conf`. In case if you need a custom server on
 http (:80) port, make sure you [handle](https://github.com/umputun/nginx-le/blob/master/conf/nginx.conf#L62) `/.well-known/` 
 path needed for LE challenge.  
 
+- provided a collection of nginx configuration snippets that can help your server improve the website's performance and secrity. Thanks to [h5bp/server-configs-nginx](https://github.com/h5bp/server-configs-nginx)
 - image uses alpine's `certbot` package.
 - `script/entrypoint.sh` requests LE certificate and will refresh every 10 days in case if certificate is close to expiration (30day)
 - `script/le.sh` gets SSL
-- nginx-le on [docker-hub](https://hub.docker.com/r/umputun/nginx-le/)
+- nginx-le on [docker-hub](https://hub.docker.com/r/0x8861/nginx-le/)
 - **A+** overall rating on [ssllabs](https://www.ssllabs.com/ssltest/index.html)
 
 ![ssllabs](https://github.com/umputun/nginx-le/blob/master/rating.png)

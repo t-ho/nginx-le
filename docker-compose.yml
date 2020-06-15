@@ -16,8 +16,9 @@ services:
 
         volumes:
             - ./etc/ssl:/etc/nginx/ssl
-            - ./etc/service-example.conf:/etc/nginx/service.conf
+            - ./templates/service-example.conf:/etc/nginx/service.conf
             # - ./etc/service-example-2.conf:/etc/nginx/service2.conf # more services, should be service*.conf
+            - ./templates/no-ssl.service-example.conf:/etc/nginx/no-ssl.service.conf # It is useful when you set LETSENCRYPT=false
         ports:
             - "80:80"
             - "443:443"
