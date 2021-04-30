@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
+FROM nginx:1.18.0-alpine
 
 RUN mv /etc/nginx /etc/nginx-previous
 COPY ./etc-nginx /etc/nginx/
