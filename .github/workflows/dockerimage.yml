@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./server/Dockerfile.prod
+          file: Dockerfile
           pull: true
           push: true
           cache-from: type=registry,ref=0x8861/nginx-le:stable
