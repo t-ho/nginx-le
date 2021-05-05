@@ -10,16 +10,16 @@ Provide a collection of nginx configuration snippets from [h5bp/server-configs-n
 ## How to use
 
 - get [docker-compose.yml](https://github.com/t-ho/nginx-le/blob/master/docker-compose.yml) and change things:
-  - set timezone to your local, for example `TZ=UTC`. For more timezone values check `/usr/share/zoneinfo` directory
-  - set `LETSENCRYPT=true` if you want automatic certificate install and renewal
-  - `LE_EMAIL` should be your email and `LE_FQDN` for domain
-  - for multiple FQDNs you can pass comma-separated list, like `LE_FQDN=aaa.example.com,bbb.example.com`
-  - alternatively set `LETSENCRYPT` to `false` and pass your own cert in `SSL_CERT`, key in `SSL_KEY` and `SSL_CHAIN_CERT`
+  - set timezone to your local, for example `NGINX_LE_TZ=UTC`. For more timezone values check `/usr/share/zoneinfo` directory
+  - set `NGINX_LE_LETSENCRYPT=true` if you want automatic certificate install and renewal
+  - `NGINX_LE_EMAIL` should be your email and `LE_FQDN` for domain
+  - for multiple FQDNs you can pass comma-separated list, like `NGINX_LE_FQDN=aaa.example.com,bbb.example.com`
+  - alternatively set `NGINX_LE_LETSENCRYPT` to `false` and pass your own cert in `NGINX_LE_SSL_CERT`, key in `NGINX_LE_SSL_KEY` and `NGINX_LE_SSL_CHAIN_CERT`
   - use provided `templates/service-example.conf` and `templates/no-ssl.service-example.conf` to make your own `templates/service.conf` and `templates/no-ssl.service.conf`. Keep ssl directives as is:
     ```nginx
-    ssl_certificate SSL_CERT;
-    ssl_certificate_key SSL_KEY;
-    ssl_trusted_certificate SSL_CHAIN_CERT;
+    ssl_certificate NGINX_LE_SSL_CERT;
+    ssl_certificate_key NGINX_LE_SSL_KEY;
+    ssl_trusted_certificate NGINX_LE_SSL_CHAIN_CERT;
     ```
 - make sure `volumes` in docker-compose.yml changed to your service config
 - you can map multiple custom config files in compose for any `service*.conf` and `no-ssl.service*.conf` (see [docker-compose.yml](https://github.com/t-ho/nginx-le/blob/master/docker-compose.yml) for `service2.conf`)

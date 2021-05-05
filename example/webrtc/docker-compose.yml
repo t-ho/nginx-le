@@ -16,7 +16,7 @@ services:
 
     nginx:
         build: .
-        image: umputun/nginx-le:latest
+        image: 0x8861/nginx-le:stable
         hostname: nginx
         restart: always
         container_name: nginx
@@ -33,10 +33,10 @@ services:
             - "8443:8443"
 
         environment:
-            - TZ=GMT
-            - LETSENCRYPT=true
-            - LE_EMAIL=youremail@example.com
-            - LE_FQDN=yourdomain.com
-            #- SSL_CERT=le-crt.pem
-            #- SSL_KEY=le-key.pem
-            #- SSL_CHAIN_CERT=le-chain-crt.pem
+            - NGINX_LE_TZ=GMT
+            - NGINX_LE_LETSENCRYPT=true
+            - NGINX_LE_EMAIL=youremail@example.com
+            - NGINX_LE_FQDN=yourdomain.com
+            #- NGINX_LE_SSL_CERT=le-crt.pem
+            #- NGINX_LE_SSL_KEY=le-key.pem
+            #- NGINX_LE_SSL_CHAIN_CERT=le-chain-crt.pem

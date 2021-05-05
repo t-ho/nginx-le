@@ -1,33 +1,32 @@
-version: '2'
+version: '3.8'
 services:
+  nginx:
+    build: .
+    image: 0x8861/nginx-le:stable
+    hostname: nginx
+    restart: always
+    container_name: nginx
 
-    nginx:
-        build: .
-        image: 0x8861/nginx-le:stable
-        hostname: nginx
-        restart: always
-        container_name: nginx
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
 
-        logging:
-          driver: json-file
-          options:
-              max-size: "10m"
-              max-file: "5"
+    volumes:
+      - ./etc/ssl:/etc/nginx/ssl
+      - ./templates/service-example.conf:/etc/nginx/service.conf
+      # - ./etc/service-example-2.conf:/etc/nginx/service2.conf # more services, should be service*.conf
+      - ./templates/no-ssl.service-example.conf:/etc/nginx/no-ssl.service.conf # It is useful when you set LETSENCRYPT=false
+    ports:
+      - '80:80'
+      - '443:443'
 
-        volumes:
-            - ./etc/ssl:/etc/nginx/ssl
-            - ./templates/service-example.conf:/etc/nginx/service.conf
-            # - ./etc/service-example-2.conf:/etc/nginx/service2.conf # more services, should be service*.conf
-            - ./templates/no-ssl.service-example.conf:/etc/nginx/no-ssl.service.conf # It is useful when you set LETSENCRYPT=false
-        ports:
-            - "80:80"
-            - "443:443"
-
-        environment:
-            - TZ=America/Chicago
-            - LETSENCRYPT=true
-            - LE_EMAIL=name@example.com
-            - LE_FQDN=www.example.com
-            #- SSL_CERT=le-crt.pem
-            #- SSL_KEY=le-key.pem
-            #- SSL_CHAIN_CERT=le-chain-crt.pem
+    environment:
+      - NGINX_LE_TZ=America/Vancouver
+      - NGINX_LE_LETSENCRYPT=true
+      - NGINX_LE_EMAIL=youremail@example.com
+      - NGINX_LE_FQDN=yourdomain.com
+      #- NGINX_LE_SSL_CERT=le-crt.pem
+      #- NGINX_LE_SSL_KEY=le-key.pem
+      #- NGINX_LE_SSL_CHAIN_CERT=le-chain-crt.pem
