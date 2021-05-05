@@ -6,12 +6,12 @@ mkdir -p /etc/nginx/conf.d
 mkdir -p /etc/nginx/ssl
 
 # set TZ
-if [[ ! -z "${TZ}" ]]; then
-    cp /usr/share/zoneinfo/${TZ} /etc/localtime
-    echo ${TZ} >/etc/timezone
+if [[ ! -z "${NGINX_LE_TZ}" ]]; then
+    cp /usr/share/zoneinfo/${NGINX_LE_TZ} /etc/localtime
+    echo ${NGINX_LE_TZ} >/etc/timezone
 fi
 
-if [ "$LETSENCRYPT" != "true" ]; then
+if [ "$NGINX_LE_LETSENCRYPT" != "true" ]; then
     echo "[-] Letsencrypt disabled"
     # collect no-ssl services
     NO_SSL_SERVICES=$(find "/etc/nginx/" -type f -maxdepth 1 -name "no-ssl.service*.conf")
@@ -23,13 +23,13 @@ if [ "$LETSENCRYPT" != "true" ]; then
 
     # replace the PLACEHOLDER_# in the *.conf file
     for i in $(seq 9); do
-        placeholder="PLACEHOLDER_$i"
-        eval "value=\$PLACEHOLDER_$i"
-        sed -i "s|${placeholder}|${value}|g" /etc/nginx/conf.d/*.conf
+        placeholder="NGINX_LE_PLACEHOLDER_$i"
+        eval "value=\$NGINX_LE_PLACEHOLDER_$i"
+        sed -i "s|${placeholder}|${value}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
     done
 
     # replace the redirect location in the default config file
-    sed -i "s|https\:\/\/\$host\$request_uri|http\:\/\/\$host\$request_uri|g" /etc/nginx/nginx.conf
+    sed -i "s|https\:\/\/\$host\$request_uri|http\:\/\/\$host\$request_uri|g" /etc/nginx/nginx.conf 2>/dev/null
 
     echo "[*] Start nginx without ssl"
 
@@ -37,10 +37,10 @@ else
     echo "[*] Letsencrypt enabled"
 
     # setup ssl keys, export to pass them to le.sh
-    echo "ssl_key=${SSL_KEY:=le-key.pem}, ssl_cert=${SSL_CERT:=le-crt.pem}, ssl_chain_cert=${SSL_CHAIN_CERT:=le-chain-crt.pem}"
-    export LE_SSL_KEY=/etc/nginx/ssl/${SSL_KEY}
-    export LE_SSL_CERT=/etc/nginx/ssl/${SSL_CERT}
-    export LE_SSL_CHAIN_CERT=/etc/nginx/ssl/${SSL_CHAIN_CERT}
+    echo "ssl_key=${NGINX_LE_SSL_KEY:=le-key.pem}, ssl_cert=${NGINX_LE_SSL_CERT:=le-crt.pem}, ssl_chain_cert=${NGINX_LE_SSL_CHAIN_CERT:=le-chain-crt.pem}"
+    export LE_SSL_KEY=/etc/nginx/ssl/${NGINX_LE_SSL_KEY}
+    export LE_SSL_CERT=/etc/nginx/ssl/${NGINX_LE_SSL_CERT}
+    export LE_SSL_CHAIN_CERT=/etc/nginx/ssl/${NGINX_LE_SSL_CHAIN_CERT}
 
     # collect services
     SERVICE_FILES=$(find "/etc/nginx/" -type f -maxdepth 1 -name "service*.conf")
@@ -50,25 +50,29 @@ else
         cp -fv /etc/nginx/service*.conf /etc/nginx/conf.d/
     fi
 
-    # replace SSL_KEY, SSL_CERT and SSL_CHAIN_CERT by actual keys
-    sed -i "s|SSL_KEY|${LE_SSL_KEY}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
-    sed -i "s|SSL_CERT|${LE_SSL_CERT}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
-    sed -i "s|SSL_CHAIN_CERT|${LE_SSL_CHAIN_CERT}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
+    # replace NGINX_LE_SSL_KEY, NGINX_LE_SSL_CERT and NGINX_LE_SSL_CHAIN_CERT by actual keys
+    sed -i "s|NGINX_LE_SSL_KEY|${LE_SSL_KEY}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
+    sed -i "s|NGINX_LE_SSL_CERT|${LE_SSL_CERT}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
+    sed -i "s|NGINX_LE_SSL_CHAIN_CERT|${LE_SSL_CHAIN_CERT}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
 
-    # replace the PLACEHOLDER_# in the *.conf file
+    sed -i "s|NGINX_LE_SSL_KEY|${LE_SSL_KEY}|g" /etc/nginx/h5bp/ssl/*.conf 2>/dev/null
+    sed -i "s|NGINX_LE_SSL_CERT|${LE_SSL_CERT}|g" /etc/nginx/h5bp/ssl/*.conf 2>/dev/null
+    sed -i "s|NGINX_LE_SSL_CHAIN_CERT|${LE_SSL_CHAIN_CERT}|g" /etc/nginx/h5bp/ssl/*.conf 2>/dev/null
+
+    # replace the NGINX_LE_PLACEHOLDER_# in the *.conf file
     for i in $(seq 9); do
-        placeholder="PLACEHOLDER_$i"
-        eval "value=\$PLACEHOLDER_$i"
+        placeholder="NGINX_LE_PLACEHOLDER_$i"
+        eval "value=\$NGINX_LE_PLACEHOLDER_$i"
         sed -i "s|${placeholder}|${value}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
     done
 
-    # replace LE_FQDN
-    domain_list=$(echo "${LE_FQDN}" | tr "," " ")
-    sed -i "s|LE_FQDN|${domain_list}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
+    # replace NGINX_LE_FQDN
+    domain_list=$(echo "${NGINX_LE_FQDN}" | tr "," " ")
+    sed -i "s|NGINX_LE_FQDN|${domain_list}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
 
     # CN Domain is the first domain in the domain list
-    export LE_CN_DOMAIN=$(echo "${LE_FQDN}" | cut -d "," -f 1)
-    sed -i "s|CN_DOMAIN|${LE_CN_DOMAIN}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
+    export LE_CN_DOMAIN=$(echo "${NGINX_LE_FQDN}" | cut -d "," -f 1)
+    sed -i "s|NGINX_LE_CN_DOMAIN|${LE_CN_DOMAIN}|g" /etc/nginx/conf.d/*.conf 2>/dev/null
 
     # generate dhparams.pem
     if [ ! -f /etc/nginx/ssl/dhparams.pem ]; then

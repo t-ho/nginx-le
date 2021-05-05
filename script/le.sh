@@ -6,8 +6,8 @@
 # 30 days
 renew_before=2592000
 
-if [ "$LETSENCRYPT" != "true" ]; then
-    echo "[-] Letsencrypt disabled. To enable, set env LETSENCRYPT=true"
+if [ "$NGINX_LE_LETSENCRYPT" != "true" ]; then
+    echo "[-] Letsencrypt disabled. To enable, set env NGINX_LE_LETSENCRYPT=true"
     return 1
 fi
 
@@ -16,7 +16,7 @@ if [ -f ${LE_SSL_CERT} ] && openssl x509 -checkend ${renew_before} -noout -in ${
     # egrep to remove leading whitespaces
     CERT_FQDNS=$(openssl x509 -in ${LE_SSL_CERT} -text -noout | egrep -o 'DNS.*')
     # run and catch exit code separately because couldn't embed $@ into `if` line properly
-    set -- $(echo ${LE_FQDN} | tr ',' '\n')
+    set -- $(echo ${NGINX_LE_FQDN} | tr ',' '\n')
     for element in "$@"; do echo ${CERT_FQDNS} | grep -q $element; done
     CHECK_RESULT=$?
     if [ ${CHECK_RESULT} -eq 0 ]; then
@@ -24,12 +24,12 @@ if [ -f ${LE_SSL_CERT} ] && openssl x509 -checkend ${renew_before} -noout -in ${
         return 1
     fi
     echo "[*] Letsencrypt certificate ${LE_SSL_CERT} is present, but doesn't contain expected domains"
-    echo "[*] Expected: ${LE_FQDN}"
+    echo "[*] Expected: ${NGINX_LE_FQDN}"
     echo "[*] Found:    ${CERT_FQDNS}"
 fi
 
 echo "[*] Letsencrypt certificate will expire soon or missing, renewing..."
-certbot certonly --agree-tos --non-interactive --force-renewal --email "${LE_EMAIL}" --webroot -w /usr/share/nginx/html -d ${LE_FQDN}
+certbot certonly --agree-tos --non-interactive --force-renewal --email "${NGINX_LE_EMAIL}" --webroot -w /usr/share/nginx/html -d ${NGINX_LE_FQDN}
 le_result=$?
 if [ ${le_result} -ne 0 ]; then
     echo "[-] Failed to run certbot"
